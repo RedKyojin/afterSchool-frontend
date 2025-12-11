@@ -30,14 +30,43 @@ const app = Vue.createApp({
                 // I realise I need at least 10; going to add more later.
             ],
             cart: [], // Array to hold the ids
-            showCart: false // Boolean for checkout
+            showCart: false, // Boolean for checkout
+
+            //Checkout:
+            name: "",
+            phoneNumber: "",
+            orderMessage: "",
+            nameTouched: false,
+            phoneTouched: false
         };
     },
     computed: {
         cartItems() {
-            return this.lessons.filter(lesson =>
-                this.cart.includes(lesson.id)
-            );
+            const counts = this.cart.reduce((acc, id) => {
+                acc[id] = (acc[id] || 0) + 1;
+                return acc;
+            }, {});
+
+            return Object.entries(counts)
+                .map(([id, count]) => {
+                    const lesson = this.lessons.find(l => l.id === Number(id));
+                    return lesson ? { ...lesson, count } : null;
+                })
+                .filter(Boolean);
+        },
+        nameValid() {
+            const trimmed = this.name.trim();
+            // Letters plus internal spaces or dashes
+            return trimmed.length > 0 && /^[A-Za-z\s-]+$/.test(trimmed);
+        },
+        phoneValid() {
+            const trimmed = this.phoneNumber.trim();
+            // Digits only
+            return trimmed.length > 0 && /^\d+$/.test(trimmed);
+        },
+        canCheckout() {
+            // Checkout enabled strictly by valid name and phone per requirements
+            return this.nameValid && this.phoneValid;
         }
     },
     methods: {
@@ -61,6 +90,21 @@ const app = Vue.createApp({
         },
         toggleView() {
             this.showCart = !this.showCart;
+        },
+        checkout() {
+            if (!this.canCheckout) {
+                this.orderMessage = "Please enter a valid name and phone number.";
+                return;
+            }
+
+            this.orderMessage = "Order submitted";
+            alert("Checkout Complete!");
+
+            // Reset fields after successful checkout
+            this.name = "";
+            this.phoneNumber = "";
+            this.nameTouched = false;
+            this.phoneTouched = false;
         }
     }
 });

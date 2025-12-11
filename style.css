@@ -1,0 +1,9 @@
+/* Simple styling for validation errors */
+.error {
+    color: red;
+    font-size: 0.9rem;
+}
+
+.input-error {
+    border: 1px solid red;
+}
