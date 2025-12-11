@@ -26,8 +26,63 @@ const app = Vue.createApp({
                     price: 25,
                     spaces: 13,
                     icon: "♟️"
+                },
+                {
+                    id: 4,
+                    subject: "Dodgeball",
+                    location: "GYM",
+                    price: 35,
+                    spaces: 3,
+                    icon: "🤾"
+                },
+                {
+                    id: 5,
+                    subject: "Football",
+                    location: "Field",
+                    price: 20,
+                    spaces: 7,
+                    icon: "⚽"
+                },
+                {
+                    id: 6,
+                    subject: "Music",
+                    location: "M1",
+                    price: 15,
+                    spaces: 8,
+                    icon: "🎻"
+                },
+                {
+                    id: 7,
+                    subject: "Drama",
+                    location: "D4",
+                    price: 14,
+                    spaces: 6,
+                    icon: "🎬"
+                },
+                {
+                    id: 8,
+                    subject: "Debate",
+                    location: "Hall",
+                    price: 10,
+                    spaces: 14,
+                    icon: "🗣️"
+                },
+                {
+                    id: 9,
+                    subject: "Karate",
+                    location: "Gym",
+                    price: 25,
+                    spaces: 11,
+                    icon: "🥋"
+                },
+                {
+                    id: 10,
+                    subject: "Fencing",
+                    location: "Stadium",
+                    price: 45,
+                    spaces: 2,
+                    icon: "🤺"
                 }
-                // I realise I need at least 10; going to add more later.
             ],
             cart: [], // Array to hold the ids
             showCart: false, // Boolean for checkout
@@ -38,11 +93,16 @@ const app = Vue.createApp({
             orderMessage: "",
             fullNameTouched: false,
             phoneTouched: false,
-            orderSubmitted: false
+            orderSubmitted: false,
+
+            //Sorting:
+            sortBy: "subject",
+            sortOrder: "asc"
         };
     },
     computed: {
         cartItems() {
+            //To stop it from duplicating
             const cart = Array.isArray(this.cart) ? this.cart : [];
             const counts = cart.reduce((acc, id) => {
                 acc[id] = (acc[id] || 0) + 1;
