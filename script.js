@@ -28,8 +28,17 @@ const app = Vue.createApp({
                     icon: "♟️"
                 }
                 //I realise I need at least 10; going to add more later.
-            ]
+            ],
+            cart: [], //Array to hold the ids
         };
+    },
+    methods: {
+        addToCart(lesson) {
+            if(lesson.spaces > 0) {
+                this.cart.push(lesson.id);
+                lesson.spaces--;
+            };
+        }
     }
 });
 
