@@ -33,16 +33,18 @@ const app = Vue.createApp({
             showCart: false, // Boolean for checkout
 
             //Checkout:
-            name: "",
+            fullName: "",
             phoneNumber: "",
             orderMessage: "",
-            nameTouched: false,
-            phoneTouched: false
+            fullNameTouched: false,
+            phoneTouched: false,
+            orderSubmitted: false
         };
     },
     computed: {
         cartItems() {
-            const counts = this.cart.reduce((acc, id) => {
+            const cart = Array.isArray(this.cart) ? this.cart : [];
+            const counts = cart.reduce((acc, id) => {
                 acc[id] = (acc[id] || 0) + 1;
                 return acc;
             }, {});
@@ -54,22 +56,26 @@ const app = Vue.createApp({
                 })
                 .filter(Boolean);
         },
-        nameValid() {
-            const trimmed = this.name.trim();
+        fullNameValid() {
+            const trimmed = this.fullName.trim();
             // Letters plus internal spaces or dashes
             return trimmed.length > 0 && /^[A-Za-z\s-]+$/.test(trimmed);
         },
         phoneValid() {
             const trimmed = this.phoneNumber.trim();
-            // Digits only
-            return trimmed.length > 0 && /^\d+$/.test(trimmed);
+            // Exactly 11 digits
+            return trimmed.length === 11 && /^\d+$/.test(trimmed);
         },
         canCheckout() {
             // Checkout enabled strictly by valid name and phone per requirements
-            return this.nameValid && this.phoneValid;
+            return this.fullNameValid && this.phoneValid;
         }
     },
     methods: {
+        resetCheckoutState() {
+            this.orderMessage = "";
+            this.orderSubmitted = false;
+        },
         addToCart(lesson) {
             if (lesson.spaces > 0) {
                 this.cart.push(lesson.id);
@@ -88,22 +94,34 @@ const app = Vue.createApp({
                 }
             }
         },
+        goToCart() {
+            this.showCart = true;
+            // Clear any prior submission state when re-entering checkout
+            this.resetCheckoutState();
+        },
+        goBack() {
+            this.showCart = false;
+            this.resetCheckoutState();
+        },
         toggleView() {
+            // Fallback toggle that also clears submission state
             this.showCart = !this.showCart;
+            this.resetCheckoutState();
         },
         checkout() {
             if (!this.canCheckout) {
-                this.orderMessage = "Please enter a valid name and phone number.";
+                this.orderMessage = "Please enter a valid name and 11-digit phone number.";
                 return;
             }
 
             this.orderMessage = "Order submitted";
+            this.orderSubmitted = true;
             alert("Checkout Complete!");
 
             // Reset fields after successful checkout
-            this.name = "";
+            this.fullName = "";
             this.phoneNumber = "";
-            this.nameTouched = false;
+            this.fullNameTouched = false;
             this.phoneTouched = false;
         }
     }

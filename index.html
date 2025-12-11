@@ -1,73 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>After School Activities App</title>
-    <link rel="stylesheet" href="style.css" />
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>After School Activities App</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 
 <body>
-    <div id="app">
-        <h1><u>After School Classes and Activities</u></h1>
+  <div id="app">
+    <h1><u>After School Classes and Activities</u></h1>
 
-        <p>Total lessons: {{ cart.length }}</p>
+    <p>Total lessons in cart: {{ cart.length }}</p>
 
-        <!-- Lesson view -->
-        <div v-if="!showCart">
-            <h2>Lessons</h2>
+    <!-- Lesson view -->
+    <div v-if="!showCart">
+      <h2>Lessons</h2>
 
-            <div v-for="lesson in lessons" :key="lesson.id" class="lesson-card">
-                <h3>{{ lesson.subject }}  {{ lesson.icon }}</h3>
-                <p>Location: {{ lesson.location }}</p>
-                <p>Price: ${{ lesson.price }}</p>
-                <p>Spaces left: {{ lesson.spaces }}</p>
+      <div v-for="lesson in lessons" :key="lesson.id" class="lesson-card">
+        <h3>{{ lesson.subject }} {{ lesson.icon }}</h3>
+        <p>Location: {{ lesson.location }}</p>
+        <p>Price: ${{ lesson.price }}</p>
+        <p>Spaces left: {{ lesson.spaces }}</p>
 
-                <button
-                @click="addToCart(lesson)"
-                :disabled="lesson.spaces === 0"
-                > <!--Disables button when 0-->
-                    Add to Cart
-                </button>
-            </div>
+        <button
+          @click="addToCart(lesson)"
+          :disabled="lesson.spaces === 0"
+        >
+          Add to Cart
+        </button>
+      </div>
 
-            <button
-            @click="toggleView()"
-            :disabled="cart.length === 0"
-            >
-                Checkout ({{ cart.length }})
-            </button>
-        </div>
-
-        <!-- Cart View -->
-        <div v-else>
-            <h2>Shopping Cart</h2>
-
-            <div v-if="cart.length === 0">
-                <p>Your cart is empty.</p>
-            </div>
-
-            <div v-for="lesson in cartItems" :key="lesson.id" class="lesson-card">
-                <h3>{{ lesson.subject }} ({{ lesson.count }}) {{ lesson.icon }}</h3>
-                <p>Location: {{ lesson.location }}</p>
-                <p>Price: ${{ lesson.price }}</p>
-                <button @click="removeFromCart(lesson.id)">Remove</button>
-            </div>
-
-            <button @click="toggleView()"><b>Go Back</b></button>
-
-            <!-- checkout area -->
-             <h3>Checkout</h3>
-             <p>Name: <input v-model="name" @input="nameTouched = true" :class="{ 'input-error': nameTouched && !nameValid }" /></p>
-             <p class="error" v-if="nameTouched && !nameValid">Name must contain letters, spaces, or dashes only.</p>
-             <p>Number: <input v-model="phoneNumber" @input="phoneTouched = true" :class="{ 'input-error': phoneTouched && !phoneValid }" /></p>
-             <p class="error" v-if="phoneTouched && !phoneValid">Phone must contain digits only.</p>
-             <button @click="checkout()" :disabled="!canCheckout">Checkout</button>
-             <b>{{ orderMessage }}</b>
-        </div>
+      <button
+        @click="goToCart()"
+        :disabled="cart.length === 0"
+      >
+        Checkout ({{ cart.length }})
+      </button>
     </div>
-    
-<script src="script.js"></script>
+
+    <!-- Cart View -->
+    <div v-else>
+      <h2>Shopping Cart</h2>
+
+      <div v-if="cart.length === 0">
+        <p>Your cart is empty.</p>
+      </div>
+
+      <div v-for="lesson in cartItems" :key="lesson.id" class="lesson-card">
+        <h3>{{ lesson.subject }} ({{ lesson.count }}) {{ lesson.icon }}</h3>
+        <p>Location: {{ lesson.location }}</p>
+        <p>Price: ${{ lesson.price }}</p>
+        <button @click="removeFromCart(lesson.id)">Remove</button>
+      </div>
+
+      <button @click="goBack()"><b>Go Back</b></button>
+
+      <!-- checkout area -->
+      <h3>Checkout</h3>
+
+      <p>
+        Name:
+        <input
+          v-model="fullName"
+          @input="fullNameTouched = true; orderSubmitted = false"
+          :class="{ 'input-error': fullNameTouched && !fullNameValid }"
+        />
+      </p>
+      <p class="error" v-if="fullNameTouched && !fullNameValid">
+        Name must contain letters, spaces, or dashes only.
+      </p>
+
+      <p>
+        Number:
+        <input
+          v-model="phoneNumber"
+          @input="phoneTouched = true; orderSubmitted = false"
+          :class="{ 'input-error': phoneTouched && !phoneValid }"
+        />
+      </p>
+      <p class="error" v-if="phoneTouched && !phoneValid">
+        Phone must contain exactly 11 digits.
+      </p>
+
+      <button
+        @click="checkout()"
+        :disabled="!canCheckout || orderSubmitted"
+      >
+        Checkout
+      </button>
+
+      <b>{{ orderMessage }}</b>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
