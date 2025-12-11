@@ -10,7 +10,18 @@
 
 <body>
     <div id="app">
-        <h1><u>After School Classes and Activitieis</u></h1>
+        <h1><u>After School Classes and Activities</u></h1>
+
+        <p>Total lessons: {{ lessons.length }}</p>
+
+        <!-- Lesson view -->
+        <h2>Lessons</h2>
+
+        <div v-for="lesson in lessons" :key="lesson.id" class="lesson-card">
+            <h3>{{ lesson.subject }}  {{ lesson.icon }}</h3>
+            <p>Location: {{ lesson.location }}</p>
+            <p>Price: £{{ lesson.price }}</p>
+            <p>Spaces left: {{ lesson.spaces }}</p>
     </div>
     
 <script src="script.js"></script>
