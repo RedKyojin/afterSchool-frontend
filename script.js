@@ -85,7 +85,7 @@ const app = Vue.createApp({
                 }
             ],
             cart: [], // Array to hold the ids
-            showCart: false, // Boolean for checkout
+            showCart: false, // Boolean for toggle
 
             //Checkout:
             fullName: "",
@@ -97,7 +97,10 @@ const app = Vue.createApp({
 
             //Sorting:
             sortBy: "subject",
-            sortOrder: "asc"
+            sortOrder: "asc",
+
+            //Search
+            searchQuery: ""
         };
     },
     computed: {
@@ -118,7 +121,7 @@ const app = Vue.createApp({
         },
         fullNameValid() {
             const trimmed = this.fullName.trim();
-            // Letters plus internal spaces or dashes
+            // Letters plus spaces and dashes
             return trimmed.length > 0 && /^[A-Za-z\s-]+$/.test(trimmed);
         },
         phoneValid() {
@@ -127,24 +130,46 @@ const app = Vue.createApp({
             return trimmed.length === 11 && /^\d+$/.test(trimmed);
         },
         canCheckout() {
-            // Checkout enabled strictly by valid name and phone per requirements
+            // checkout gets enabled by valid name and number
             return this.fullNameValid && this.phoneValid;
         },
         sortedLessons() {
             const field = this.sortBy;
             const order = this.sortOrder;
 
-            return [...this.lessons].sort((a, b) => {
+            return [...this.lessons].sort((a, b) => { //Creates new array
                 let x = a[field];
                 let y = b[field];
 
-                // Normalize strings for consistent sorting
+                // lowercase for consistent sorting
                 if (typeof x === "string") x = x.toLowerCase();
                 if (typeof y === "string") y = y.toLowerCase();
 
                 if (x < y) return order === "asc" ? -1 : 1;
                 if (x > y) return order === "asc" ? 1 : -1;
                 return 0;
+            });
+        },
+        filterLessons() {
+            const x = this.searchQuery.trim().toLowerCase();
+
+            //For when search box is empty, returns normal list
+            if (!x) return this.sortedLessons;
+
+            //Filters the already sorted lessons
+            return this.sortedLessons.filter(lesson => {
+                const subject = String(lesson.subject).toLowerCase();
+                const location = String(lesson.location).toLowerCase();
+                const price = String(lesson.price).toLowerCase();
+                const spaces = String(lesson.spaces).toLowerCase();
+
+                //returns boolean
+                return (
+                    subject.includes(x) || location.includes(x) ||
+                    price.includes(x) || spaces.includes(x)
+                );
+                //Each includes() returns true or false, and filter() keeps only the lessons that return true
+
             });
         }
     },

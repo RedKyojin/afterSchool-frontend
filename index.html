@@ -12,11 +12,18 @@
     <div id="app">
       <h1><u>After School Classes and Activities</u></h1>
 
-      <p>Total lessons in cart: {{ cart.length }}</p>
+      <p>🛒<b>{{ cart.length }} </b></p>
 
       
       <div v-if="!showCart">
         <h2>Lessons</h2>
+
+
+
+        <!-- Searchbar -->
+        <label><b>Search: </b></label>
+        <input v-model="searchQuery" type="" placeholder="Search: subject, location, price, spaces..."/>
+
 
         <!-- Sorting -->
         <select v-model="sortBy">
@@ -25,7 +32,6 @@
           <option value="price">Price</option>
           <option value="spaces">Spaces</option>
         </select>
-
         <label><b>Order: </b></label>
         <select v-model="sortOrder">
           <option value="asc">Ascending</option>
@@ -33,10 +39,10 @@
         </select>
 
 
-
+ 
 
         <!-- Lesson view -->
-        <div v-for="lesson in sortedLessons" :key="lesson.id" class="lesson-card">
+        <div v-for="lesson in filterLessons" :key="lesson.id" class="lesson-card">
           <h3>{{ lesson.subject }} {{ lesson.icon }}</h3>
           <p>Location: {{ lesson.location }}</p>
           <p>Price: ${{ lesson.price }}</p>
