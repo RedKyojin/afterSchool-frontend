@@ -129,6 +129,23 @@ const app = Vue.createApp({
         canCheckout() {
             // Checkout enabled strictly by valid name and phone per requirements
             return this.fullNameValid && this.phoneValid;
+        },
+        sortedLessons() {
+            const field = this.sortBy;
+            const order = this.sortOrder;
+
+            return [...this.lessons].sort((a, b) => {
+                let x = a[field];
+                let y = b[field];
+
+                // Normalize strings for consistent sorting
+                if (typeof x === "string") x = x.toLowerCase();
+                if (typeof y === "string") y = y.toLowerCase();
+
+                if (x < y) return order === "asc" ? -1 : 1;
+                if (x > y) return order === "asc" ? 1 : -1;
+                return 0;
+            });
         }
     },
     methods: {
