@@ -1,232 +1,211 @@
+const API_BASE = "http://localhost:3000"; // later change to your deployed backend URL
+
 const app = Vue.createApp({
-    data() {
-        return {
-            // Creating the lessons
-            lessons: [
-                {
-                    id: 1,
-                    subject: "Maths",
-                    location: "M5",
-                    price: 20,
-                    spaces: 9,
-                    icon: "✖️"
-                },
-                {
-                    id: 2,
-                    subject: "Science",
-                    location: "S2",
-                    price: 20,
-                    spaces: 12,
-                    icon: "🧑‍🔬"
-                },
-                {
-                    id: 3,
-                    subject: "Chess",
-                    location: "R6",
-                    price: 25,
-                    spaces: 13,
-                    icon: "♟️"
-                },
-                {
-                    id: 4,
-                    subject: "Dodgeball",
-                    location: "GYM",
-                    price: 35,
-                    spaces: 3,
-                    icon: "🤾"
-                },
-                {
-                    id: 5,
-                    subject: "Football",
-                    location: "Field",
-                    price: 20,
-                    spaces: 7,
-                    icon: "⚽"
-                },
-                {
-                    id: 6,
-                    subject: "Music",
-                    location: "M1",
-                    price: 15,
-                    spaces: 8,
-                    icon: "🎻"
-                },
-                {
-                    id: 7,
-                    subject: "Drama",
-                    location: "D4",
-                    price: 14,
-                    spaces: 6,
-                    icon: "🎬"
-                },
-                {
-                    id: 8,
-                    subject: "Debate",
-                    location: "Hall",
-                    price: 10,
-                    spaces: 14,
-                    icon: "🗣️"
-                },
-                {
-                    id: 9,
-                    subject: "Karate",
-                    location: "Gym",
-                    price: 25,
-                    spaces: 11,
-                    icon: "🥋"
-                },
-                {
-                    id: 10,
-                    subject: "Fencing",
-                    location: "Stadium",
-                    price: 45,
-                    spaces: 2,
-                    icon: "🤺"
-                }
-            ],
-            cart: [], // Array to hold the ids
-            showCart: false, // Boolean for toggle
+  data() {
+    return {
+      // Lessons now come from backend
+      lessons: [],
 
-            //Checkout:
-            fullName: "",
-            phoneNumber: "",
-            orderMessage: "",
-            fullNameTouched: false,
-            phoneTouched: false,
-            orderSubmitted: false,
+      cart: [],
+      showCart: false,
 
-            //Sorting:
-            sortBy: "subject",
-            sortOrder: "asc",
+      // Checkout:
+      fullName: "",
+      phoneNumber: "",
+      orderMessage: "",
+      fullNameTouched: false,
+      phoneTouched: false,
+      orderSubmitted: false,
 
-            //Search
-            searchQuery: ""
-        };
+      // Sorting:
+      sortBy: "subject",
+      sortOrder: "asc",
+
+      // Search:
+      searchQuery: ""
+    };
+  },
+
+  async mounted() {
+    await this.fetchLessons();
+  },
+
+  computed: {
+    cartItems() {
+      const cart = Array.isArray(this.cart) ? this.cart : [];
+      const counts = cart.reduce((acc, id) => {
+        acc[id] = (acc[id] || 0) + 1;
+        return acc;
+      }, {});
+
+      return Object.entries(counts)
+        .map(([id, count]) => {
+          const lesson = this.lessons.find(l => l.id === Number(id));
+          return lesson ? { ...lesson, count } : null;
+        })
+        .filter(Boolean);
     },
-    computed: {
-        cartItems() {
-            //To stop it from duplicating
-            const cart = Array.isArray(this.cart) ? this.cart : [];
-            const counts = cart.reduce((acc, id) => {
-                acc[id] = (acc[id] || 0) + 1;
-                return acc;
-            }, {});
 
-            return Object.entries(counts)
-                .map(([id, count]) => {
-                    const lesson = this.lessons.find(l => l.id === Number(id));
-                    return lesson ? { ...lesson, count } : null;
-                })
-                .filter(Boolean);
-        },
-        fullNameValid() {
-            const trimmed = this.fullName.trim();
-            // Letters plus spaces and dashes
-            return trimmed.length > 0 && /^[A-Za-z\s-]+$/.test(trimmed);
-        },
-        phoneValid() {
-            const trimmed = this.phoneNumber.trim();
-            // Exactly 11 digits
-            return trimmed.length === 11 && /^\d+$/.test(trimmed);
-        },
-        canCheckout() {
-            // checkout gets enabled by valid name and number
-            return this.fullNameValid && this.phoneValid;
-        },
-        sortedLessons() {
-            const field = this.sortBy;
-            const order = this.sortOrder;
-
-            return [...this.lessons].sort((a, b) => { //Creates new array
-                let x = a[field];
-                let y = b[field];
-
-                // lowercase for consistent sorting
-                if (typeof x === "string") x = x.toLowerCase();
-                if (typeof y === "string") y = y.toLowerCase();
-
-                if (x < y) return order === "asc" ? -1 : 1;
-                if (x > y) return order === "asc" ? 1 : -1;
-                return 0;
-            });
-        },
-        filterLessons() {
-            const x = this.searchQuery.trim().toLowerCase();
-
-            //For when search box is empty, returns normal list
-            if (!x) return this.sortedLessons;
-
-            //Filters the already sorted lessons
-            return this.sortedLessons.filter(lesson => {
-                const subject = String(lesson.subject).toLowerCase();
-                const location = String(lesson.location).toLowerCase();
-                const price = String(lesson.price).toLowerCase();
-                const spaces = String(lesson.spaces).toLowerCase();
-
-                //returns boolean
-                return (
-                    subject.includes(x) || location.includes(x) ||
-                    price.includes(x) || spaces.includes(x)
-                );
-                //Each includes() returns true or false, and filter() keeps only the lessons that return true
-
-            });
-        }
+    fullNameValid() {
+      const trimmed = this.fullName.trim();
+      return trimmed.length > 0 && /^[A-Za-z\s-]+$/.test(trimmed);
     },
-    methods: {
-        resetCheckoutState() {
-            this.orderMessage = "";
-            this.orderSubmitted = false;
-        },
-        addToCart(lesson) {
-            if (lesson.spaces > 0) {
-                this.cart.push(lesson.id);
-                lesson.spaces--;
-            }
-        },
-        removeFromCart(lessonId) {
-            const index = this.cart.indexOf(lessonId);
-            if (index !== -1) {
-                // Removes from cart
-                this.cart.splice(index, 1);
-                // Search the lessons array, and return the first lesson where its id equals lessonId
-                const lesson = this.lessons.find(l => l.id === lessonId);
-                if (lesson) {
-                    lesson.spaces++;
-                }
-            }
-        },
-        goToCart() {
-            this.showCart = true;
-            // Clear any prior submission state when re-entering checkout
-            this.resetCheckoutState();
-        },
-        goBack() {
-            this.showCart = false;
-            this.resetCheckoutState();
-        },
-        toggleView() {
-            // Fallback toggle that also clears submission state
-            this.showCart = !this.showCart;
-            this.resetCheckoutState();
-        },
-        checkout() {
-            if (!this.canCheckout) {
-                this.orderMessage = "Please enter a valid name and 11-digit phone number.";
-                return;
-            }
 
-            this.orderMessage = "Order submitted";
-            this.orderSubmitted = true;
-            alert("Checkout Complete!");
+    phoneValid() {
+      const trimmed = this.phoneNumber.trim();
+      return trimmed.length === 11 && /^\d+$/.test(trimmed);
+    },
 
-            // Reset fields after successful checkout
-            this.fullName = "";
-            this.phoneNumber = "";
-            this.fullNameTouched = false;
-            this.phoneTouched = false;
-        }
+    canCheckout() {
+      return this.fullNameValid && this.phoneValid;
+    },
+
+    sortedLessons() {
+      const field = this.sortBy;
+      const order = this.sortOrder;
+
+      // Creates new array before sorting (so we don't mutate original)
+      return [...this.lessons].sort((a, b) => {
+        let x = a[field];
+        let y = b[field];
+
+        if (typeof x === "string") x = x.toLowerCase();
+        if (typeof y === "string") y = y.toLowerCase();
+
+        if (x < y) return order === "asc" ? -1 : 1;
+        if (x > y) return order === "asc" ? 1 : -1;
+        return 0;
+      });
+    },
+
+    filterLessons() {
+      const x = this.searchQuery.trim().toLowerCase();
+      if (!x) return this.sortedLessons;
+
+      return this.sortedLessons.filter(lesson => {
+        const subject = String(lesson.subject).toLowerCase();
+        const location = String(lesson.location).toLowerCase();
+        const price = String(lesson.price).toLowerCase();
+        const spaces = String(lesson.spaces).toLowerCase();
+
+        return (
+          subject.includes(x) ||
+          location.includes(x) ||
+          price.includes(x) ||
+          spaces.includes(x)
+        );
+      });
     }
+  },
+
+  methods: {
+    resetCheckoutState() {
+      this.orderMessage = "";
+      this.orderSubmitted = false;
+    },
+
+    async fetchLessons() {
+      try {
+        const res = await fetch(`${API_BASE}/lessons`);
+        if (!res.ok) throw new Error(`GET /lessons failed: ${res.status}`);
+        const data = await res.json();
+        this.lessons = Array.isArray(data) ? data : [];
+      } catch (err) {
+        console.error(err);
+        this.orderMessage = "Failed to load lessons from server.";
+      }
+    },
+
+    addToCart(lesson) {
+      if (lesson.spaces > 0) {
+        this.cart.push(lesson.id);
+        lesson.spaces--;
+      }
+    },
+
+    removeFromCart(lessonId) {
+      const index = this.cart.indexOf(lessonId);
+      if (index !== -1) {
+        this.cart.splice(index, 1);
+        const lesson = this.lessons.find(l => l.id === lessonId);
+        if (lesson) lesson.spaces++;
+      }
+    },
+
+    goToCart() {
+      this.showCart = true;
+      this.resetCheckoutState();
+    },
+
+    goBack() {
+      this.showCart = false;
+      this.resetCheckoutState();
+    },
+
+    async checkout() {
+      if (!this.canCheckout) {
+        this.orderMessage = "Please enter a valid name and 11-digit phone number.";
+        return;
+      }
+
+      try {
+        // POST: save order
+        const postRes = await fetch(`${API_BASE}/orders`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: this.fullName.trim(),
+            phone: this.phoneNumber.trim(),
+            lessonIDs: [...this.cart]
+          })
+        });
+
+        if (!postRes.ok) {
+          const msg = await postRes.text();
+          throw new Error(`POST /orders failed: ${postRes.status} ${msg}`);
+        }
+
+        // PUT: update available spaces (update to any number, not +/-1)
+        const uniqueLessonIds = [...new Set(this.cart)];
+        await Promise.all(
+          uniqueLessonIds.map(async (id) => {
+            const lesson = this.lessons.find(l => l.id === id);
+            if (!lesson) return;
+
+            const putRes = await fetch(`${API_BASE}/lessons/${id}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ spaces: lesson.spaces })
+            });
+
+            if (!putRes.ok) {
+              const msg = await putRes.text();
+              throw new Error(`PUT /lessons/${id} failed: ${putRes.status} ${msg}`);
+            }
+          })
+        );
+
+        // UI success
+        this.orderMessage = "Order submitted";
+        this.orderSubmitted = true;
+        alert("Checkout Complete!");
+
+        // Reset UI + cart
+        this.cart = [];
+        this.fullName = "";
+        this.phoneNumber = "";
+        this.fullNameTouched = false;
+        this.phoneTouched = false;
+
+        // Refresh lessons from DB so UI matches server truth
+        await this.fetchLessons();
+      } catch (err) {
+        console.error(err);
+        this.orderMessage = "Checkout failed (server error).";
+      }
+    }
+  }
 });
 
 app.mount("#app");
+
