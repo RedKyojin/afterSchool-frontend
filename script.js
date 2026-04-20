@@ -1,4 +1,4 @@
-const API_BASE = "https://afterschool-server.onrender.com/"
+const API_BASE = "https://afterschool-server.onrender.com" //There was a dash so it didn't connect
 const app = Vue.createApp({
   data() {
     return {
