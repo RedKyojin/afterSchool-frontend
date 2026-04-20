@@ -64,7 +64,7 @@ const app = Vue.createApp({
       const field = this.sortBy;
       const order = this.sortOrder;
 
-      // Creates new array before sorting (so we don't mutate original)
+      // Creates new array before sorting
       return [...this.lessons].sort((a, b) => {
         let x = a[field];
         let y = b[field];
