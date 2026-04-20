@@ -1,5 +1,4 @@
-const API_BASE = "http://localhost:3000"; // later change to your deployed backend URL
-
+const API_BASE = "https://afterschool-server.onrender.com/"
 const app = Vue.createApp({
   data() {
     return {
